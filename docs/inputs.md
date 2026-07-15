@@ -16,13 +16,30 @@ The intended wiring is a plain dry contact (switch) between the input terminal a
 GND — not a voltage source. The image shows exactly this: a switch from GND to an
 input terminal, matching the "0V = True" case.
 
+## Optocoupler part
+
+Confirmed from a board close-up photo
+(https://www.kincony.com/images/B32M/pcf8575.JPG), which shows parts marked
+`C519 / EL3H7` next to the `PCF8575TS` I/O expander:
+
+- EL3H7 — Everlight 4-pin SSOP phototransistor optocoupler
+  ([datasheet](http://www.mouser.com/datasheet/2/143/EL3H7_G-26376.pdf)):
+  CTR 80-160%, 3750 Vrms isolation, 50mA max collector current, NPN
+  phototransistor output.
+
+One EL3H7 per input channel provides the galvanic isolation between the field
+wiring and the PCF8575/ESP32 side. Note: input and output circuitry are
+physically interleaved on the PCB, so these optocouplers can appear right next
+to the NCE60P10K output MOSFETs (see `docs/outputs.md`) in board photos —
+they are unrelated to output-side flyback protection.
+
 ## Hardware level: active-low
 
 Despite the logical meaning above being active-high (closed contact = True), the
 signal is actually **active-low** at the chip level:
 
-- Each input has an optocoupler with an internal pull-up to the field-side
-  12-24V rail.
+- Each input has an optocoupler (EL3H7, see above) with an internal pull-up to
+  the field-side 12-24V rail.
 - The PCF8575 pin the ESP32 reads sits **HIGH** normally (contact open, or
   12-24V applied to the terminal — no voltage differential across the opto LED,
   so it doesn't conduct).
